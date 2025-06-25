@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Play Gun Fire - an exciting shooting game with realistic physics and multiple levels. Test your aim and reaction time in this browser-based game.">
+    <meta name="keywords" content="gun game, shooting game, browser game, HTML5 game, free online game">
+    <meta name="author" content="Gun Fire Game">
+    <meta property="og:title" content="Gun Fire - Free Online Shooting Game">
+    <meta property="og:description" content="Test your shooting skills in this exciting browser-based gun game.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://example.com/gun-fire-game">
+    <title>Gun Fire - Free Online Shooting Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #222;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        header {
+            background-color: #333;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 1rem 0;
+        }
+        
+        .ad-space {
+            background-color: #444;
+            color: #fff;
+            text-align: center;
+            padding: 1rem;
+            margin: 1rem 0;
+            border: 1px dashed #666;
+            min-height: 90px;
+        }
+        
+        #gameCanvas {
+            background-color: #111;
+            border: 3px solid #444;
+            border-radius: 5px;
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin: 1rem 0;
+            background-color: #333;
+            padding: 1rem;
+            border-radius: 5px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        footer {
+            background-color: #333;
+            padding: 1rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .ad-space.top, .ad-space.bottom {
+                width: 100%;
+            }
+            
+            .ad-space.left, .ad-space.right {
+                width: 160px;
+                min-height: 600px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .main-content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                padding: 0 1rem;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .ad-space {
+                min-height: 50px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Gun Fire</h1>
+        <p>Test your shooting skills in this exciting browser-based game</p>
+    </header>
+    
+    <div class="container">
+        <!-- Top Ad Space -->
+        <div class="ad-space top">
+            <p>Advertisement</p>
+            <!-- Ad code would go here -->
+            <div id="top-ad" style="width: 100%; height: 90px;">
+                <!-- Example ad placeholder -->
+                <img src="https://via.placeholder.com/728x90" alt="Advertisement" style="max-width: 100%; height: auto;">
+            </div>
+        </div>
+        
+        <!-- Left Ad Space (desktop only) -->
+        <div class="ad-space left">
+            <p>Advertisement</p>
+            <!-- Ad code would go here -->
+            <div id="left-ad" style="width: 160px; height: 600px;">
+                <!-- Example ad placeholder -->
+                <img src="https://via.placeholder.com/160x600" alt="Advertisement" style="max-width: 100%; height: auto;">
+            </div>
+        </div>
+        
+        <!-- Main Game Content -->
+        <div class="main-content">
+            <div class="game-stats">
+                <div class="stat">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value" id="score">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Ammo</div>
+                    <div class="stat-value" id="ammo">30</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Level</div>
+                    <div class="stat-value" id="level">1</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Targets</div>
+                    <div class="stat-value" id="targets">0/5</div>
+                </div>
+            </div>
+            
+            <div class="game-container">
+                <canvas id="gameCanvas" width="800" height="500"></canvas>
+            </div>
+            
+            <div class="controls">
+                <button id="startBtn">Start Game</button>
+                <button id="reloadBtn">Reload (R)</button>
+                <button id="pauseBtn">Pause (P)</button>
+                <button id="soundBtn">Sound On/Off</button>
+            </div>
+            
+            <div class="game-info">
+                <h2>How to Play</h2>
+                <ul>
+                    <li>Click or tap on the screen to shoot</li>
+                    <li>Hit targets to score points</li>
+                    <li>Reload when you run out of ammo</li>
+                    <li>Complete each level by hitting all targets</li>
+                    <li>Avoid shooting civilians (red targets)</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Right Ad Space (desktop only) -->
+        <div class="ad-space right">
+            <p>Advertisement</p>
+            <!-- Ad code would go here -->
+            <div id="right-ad" style="width: 160px; height: 600px;">
+                <!-- Example ad placeholder -->
+                <img src="https://via.placeholder.com/160x600" alt="Advertisement" style="max-width: 100%; height: auto;">
+            </div>
+        </div>
+        
+        <!-- Bottom Ad Space -->
+        <div class="ad-space bottom">
+            <p>Advertisement</p>
+            <!-- Ad code would go here -->
+            <div id="bottom-ad" style="width: 100%; height: 90px;">
+                <!-- Example ad placeholder -->
+                <img src="https://via.placeholder.com/728x90" alt="Advertisement" style="max-width: 100%; height: auto;">
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2023 Gun Fire Game. All rights reserved.</p>
+        <p>This game is free to play and does not require any downloads.</p>
+    </footer>
+    
+    <script>
+        // Game variables
+        let canvas, ctx;
+        let gameRunning = false;
+        let score = 0;
+        let ammo = 30;
+        let level = 1;
+        let targetsHit = 0;
+        let targetsRequired = 5;
+        let targets = [];
+        let civilians = [];
+        let soundEnabled = true;
+        let gamePaused = false;
+        
+        // Sounds
+        const shootSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-short-gun-shot-1670.mp3');
+        const reloadSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-gun-reload-2291.mp3');
+        const hitSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3');
+        const levelUpSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3');
+        
+        // Initialize game
+        function initGame() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Make canvas responsive
+            function resizeCanvas() {
+                const container = document.querySelector('.game-container');
+                const containerWidth = container.clientWidth;
+                
+                // Maintain aspect ratio (16:10)
+                canvas.width = Math.min(800, containerWidth - 40);
+                canvas.height = canvas.width * 0.625;
+                
+                if (gameRunning) {
+                    drawGame();
+                }
+            }
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+            
+            // Event listeners
+            canvas.addEventListener('click', handleShoot);
+            document.getElementById('startBtn').addEventListener('click', startGame);
+            document.getElementById('reloadBtn').addEventListener('click', reload);
+            document.getElementById('pauseBtn').addEventListener('click', togglePause);
+            document.getElementById('soundBtn').addEventListener('click', toggleSound);
+            
+            // Keyboard controls
+            document.addEventListener('keydown', (e) => {
+                if (e.key.toLowerCase() === 'r') {
+                    reload();
+                } else if (e.key.toLowerCase() === 'p') {
+                    togglePause();
+                }
+            });
+        }
+        
+        // Start game
+        function startGame() {
+            if (gameRunning) return;
+            
+            gameRunning = true;
+            gamePaused = false;
+            score = 0;
+            ammo = 30;
+            level = 1;
+            targetsHit = 0;
+            targetsRequired = 5;
+            
+            updateStats();
+            generateTargets();
+            gameLoop();
+        }
+        
+        // Game loop
+        function gameLoop() {
+            if (gamePaused) return;
+            
+            if (!gameRunning) return;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw targets
+            drawTargets();
+            
+            // Draw civilians
+            drawCivilians();
+            
+            // Draw gun sight
+            drawSight();
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Generate targets
+        function generateTargets() {
+            targets = [];
+            civilians = [];
+            
+            for (let i = 0; i < targetsRequired; i++) {
+                targets.push({
+                    x: Math.random() * (canvas.width - 40),
+                    y: Math.random() * (canvas.height - 40),
+                    width: 40,
+                    height: 40,
+                    hit: false
+                });
+            }
+            
+            // Add some civilians (negative targets)
+            for (let i = 0; i < Math.floor(level * 1.5); i++) {
+                civilians.push({
+                    x: Math.random() * (canvas.width - 40),
+                    y: Math.random() * (canvas.height - 40),
+                    width: 40,
+                    height: 40
+                });
+            }
+        }
+        
+        // Draw targets
+        function drawTargets() {
+            ctx.fillStyle = '#4CAF50';
+            targets.forEach(target => {
+                if (!target.hit) {
+                    ctx.fillRect(target.x, target.y, target.width, target.height);
+                }
+            });
+        }
+        
+        // Draw civilians
+        function drawCivilians() {
+            ctx.fillStyle = '#f44336';
+            civilians.forEach(civilian => {
+                ctx.fillRect(civilian.x, civilian.y, civilian.width, civilian.height);
+            });
+        }
+        
+        // Draw gun sight
+        function drawSight() {
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            
+            // Crosshair
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const size = 20;
+            
+            ctx.beginPath();
+            // Horizontal line
+            ctx.moveTo(centerX - size, centerY);
+            ctx.lineTo(centerX + size, centerY);
+            // Vertical line
+            ctx.moveTo(centerX, centerY - size);
+            ctx.lineTo(centerX, centerY + size);
+            ctx.stroke();
+            
+            // Circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, size / 2, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        
+        // Handle shooting
+        function handleShoot(e) {
+            if (!gameRunning || gamePaused || ammo <= 0) return;
+            
+            // Play shoot sound
+            if (soundEnabled) {
+                shootSound.currentTime = 0;
+                shootSound.play();
+            }
+            
+            ammo--;
+            updateStats();
+            
+            // Get mouse position relative to canvas
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            // Check if hit any targets
+            let hitSomething = false;
+            
+            // Check targets
+            targets.forEach(target => {
+                if (!target.hit && 
+                    mouseX > target.x && mouseX < target.x + target.width &&
+                    mouseY > target.y && mouseY < target.y + target.height) {
+                    
+                    target.hit = true;
+                    hitSomething = true;
+                    targetsHit++;
+                    score += 100 * level;
+                    
+                    if (soundEnabled) {
+                        hitSound.currentTime = 0;
+                        hitSound.play();
+                    }
+                    
+                    // Check level completion
+                    if (targetsHit >= targetsRequired) {
+                        levelUp();
+                    }
+                }
+            });
+            
+            // Check civilians (negative points)
+            civilians.forEach(civilian => {
+                if (mouseX > civilian.x && mouseX < civilian.x + civilian.width &&
+                    mouseY > civilian.y && mouseY < civilian.y + civilian.height) {
+                    
+                    hitSomething = true;
+                    score = Math.max(0, score - 200);
+                }
+            });
+            
+            // Small penalty for missing
+            if (!hitSomething) {
+                score = Math.max(0, score - 10);
+            }
+            
+            updateStats();
+            
+            // Check if out of ammo
+            if (ammo <= 0) {
+                setTimeout(() => {
+                    alert("Out of ammo! Press Reload to continue.");
+                }, 100);
+            }
+        }
+        
+        // Reload gun
+        function reload() {
+            if (!gameRunning || gamePaused) return;
+            
+            ammo = 30;
+            
+            if (soundEnabled) {
+                reloadSound.currentTime = 0;
+                reloadSound.play();
+            }
+            
+            updateStats();
+        }
+        
+        // Level up
+        function levelUp() {
+            level++;
+            targetsHit = 0;
+            targetsRequired = Math.floor(5 + level * 1.5);
+            
+            if (soundEnabled) {
+                levelUpSound.currentTime = 0;
+                levelUpSound.play();
+            }
+            
+            // Generate new targets for next level
+            setTimeout(() => {
+                generateTargets();
+                updateStats();
+            }, 1000);
+        }
+        
+        // Toggle pause
+        function togglePause() {
+            gamePaused = !gamePaused;
+            document.getElementById('pauseBtn').textContent = gamePaused ? 'Resume (P)' : 'Pause (P)';
+            
+            if (!gamePaused && gameRunning) {
+                gameLoop();
+            }
+        }
+        
+        // Toggle sound
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundBtn').textContent = soundEnabled ? 'Sound Off' : 'Sound On';
+        }
+        
+        // Update game stats display
+        function updateStats() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('ammo').textContent = ammo;
+            document.getElementById('level').textContent = level;
+            document.getElementById('targets').textContent = `${targetsHit}/${targetsRequired}`;
+        }
+        
+        // Draw game (for resizing)
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawTargets();
+            drawCivilians();
+            drawSight();
+        }
+        
+        // Initialize game when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+    
+    <!-- Structured data for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Game",
+        "name": "Gun Fire",
+        "description": "An exciting browser-based shooting game where you test your aim and reaction time.",
+        "genre": "Shooting game",
+        "gamePlatform": "Web browser",
+        "applicationCategory": "Game",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "Gun Fire Game"
+        }
+    }
+    </script>
+</body>
+</html>
